@@ -1,0 +1,8 @@
+.dub
+docs.json
+*.exe
+*.o
+*.obj
+*.lst
+
+bin/

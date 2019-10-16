@@ -16,7 +16,7 @@ module map.map;
       private real _x : the current value of the map
       (the current value of the orbit)
 
-      private real[] _orbit : the ordened set of _x_0, _x_1, ... points
+      private real[] _orbit : the ordered set of _x_0, _x_1, ... points
       of the orbit, with _x_k = f^{k}(_x_0). If x_n is a fixed point, the
       _orbit is finite (although the rage is infinity;
       _x_m = _x_n, for m > n)
@@ -32,7 +32,7 @@ module map.map;
       current value of _x is a fixed point
 
       real opIndex(size_t) : overloads the [] operator. It is used to
-      get an element of the _orbit array. If x_n é a fixed point, it
+      get an element of the _orbit array. If x_n is a fixed point, it
       is the last element of _orbit. opIndex(m) will return _orbit[n],
       for m > n, in this case.
 */

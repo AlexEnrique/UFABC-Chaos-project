@@ -6,6 +6,8 @@ import std.random;
 import std.array;
 import plt = matplotlibd.pyplot;
 
+import std.stdio;
+
 import map.map;
 import map.logistic;
 
@@ -22,7 +24,7 @@ void main() {
                         .array;
         x ~= replicate!(real[])([a], 200);
     }
-
+    
     // matplotlib
     plt.plot(x, y, "r,");
     plt.title("Bifurcation Diagram for the logistic $f_a$ map");

@@ -14,6 +14,8 @@ import map.map;
       this(real x) : sets the initial value of the Map!(x => a*x*(1-x))
 */
 class LogisticMap(real a) : Map!(x => a*x*(1-x)) {
+    this() {}
+        
     this(real x) {
         super(x);
     }

@@ -1,4 +1,5 @@
 module map.map;
+import map.primitives;
 
 /**
     Range template class Map.
@@ -41,6 +42,8 @@ class Map(alias f) {
     private real[] _orbit;
     enum bool empty = false;
 
+    this() {}
+
     this(real x) {
         _x = x;
         _orbit ~= x;
@@ -67,12 +70,21 @@ class Map(alias f) {
 
         return _orbit[n];
     }
+
+    real opCall(real x) const {
+        return f(x);
+    }
+
+    auto save() {
+        return this;
+    }
 }
 
 unittest {
     import std.range : take;
     import std.math : approxEqual;
     auto map = new Map!(x => 2*x*(1-x))(0.01);
+    assert(isMap!(typeof(map)));
     assert(map.take(12).approxEqual([0.01000, 0.01980, 0.0388159, 0.0746185,
                                      0.138101, 0.238058, 0.362773, 0.462338,
                                      0.497163, 0.499984, 0.50000, 0.50000]));

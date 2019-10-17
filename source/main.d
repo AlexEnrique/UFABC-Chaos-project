@@ -2,31 +2,35 @@ module main;
 import std.math;
 import std.range;
 import std.algorithm;
+import std.random;
+import std.array;
 import plt = matplotlibd.pyplot;
 
 import map.map;
 import map.logistic;
 
-// Example using the logistic map and matplotlibd
+// Bifurcation diagram example using the logistic map and matplotlibd
 void main() {
-    auto logisticMap = new LogisticMap!(4)(0.01);
-    auto map2 = new LogisticMap!(4)(0.010001);
+    auto rnd = Mt19937_64(unpredictableSeed!ulong);
 
-    uint numPoints = 50;
-    auto x = iota(numPoints);
-    auto y = logisticMap.take(numPoints);
+    real[] y;
+    real[] x;
+    foreach (real a; iota(0, 4, .005)) {
+        auto logisticMap = new Map!(x => a*x*(1-x))(rnd.uniform01());
+        y ~= logisticMap.drop(100)
+                        .take(200)
+                        .array;
+        x ~= replicate!(real[])([a], 200);
+    }
 
-    auto x2 = iota(numPoints);
-    auto y2 = map2.take(numPoints);
-
-    plt.plot(x, y, "b-", ["label": "$f_4$ with $x_0$ = .01"]);
-    plt.plot(x2, y2, "r--", ["label": "$f_4$ with $x_0$ = .010001"]);
-    plt.legend(["loc": "upper left"]);
+    // matplotlib
+    plt.plot(x, y, "r,");
+    plt.title("Bifurcation Diagram for the logistic $f_a$ map");
+    plt.xlim(0, 4);
     plt.ylim(0, 1);
-    plt.title("Two orbits for the logistic map with parameter 4");
-    plt.xlabel("step (n)");
-    plt.ylabel("$x_n$");
-    plt.savefig("./figures/logistic.png");
+    plt.xlabel("parameter $a$");
+    plt.ylabel("orbit");
+    plt.savefig("./figures/bifurcation_diagram.png");
     plt.show();
     plt.clear();
 }

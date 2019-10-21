@@ -11,6 +11,7 @@
 		"gtk-d": "3.3.1",
 		"matplotlib-d": "0.1.5",
 		"painlesstraits": "0.3.0",
+		"scid": "0.3.0",
 		"windows-headers": "1.0.3",
 		"x11": "1.0.21"
 	}

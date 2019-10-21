@@ -9,12 +9,12 @@ import map.primitives;
 
 bool isSink(alias f)(Map!f map, real point) {
     auto func = function real(real x) { return f(x); };
-    return abs(diff(func, point).value) < 1;
+    return abs(func.diff(point).value) < 1;
 }
 
 bool isSource(alias f)(Map!f map, real point) {
     auto func = function real(real x) { return f(x); };
-    return abs(diff(func, point).value) > 1;
+    return abs(func.diff(point).value) > 1;
 }
 
 unittest {

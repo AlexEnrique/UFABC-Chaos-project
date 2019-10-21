@@ -1,23 +1,15 @@
-module map.algorithm;
+module map.functions;
 import std.math;
 import map.map;
 import map.logistic;
 import map.primitives;
 
-bool isSink(M)(M map, real point)
-    if(isMap!M)
-{
-    real epsilon = 10.0^^(-8);
-    return abs((map(point + epsilon / 2) - map(point - epsilon / 2))
-           / epsilon) < 1;
+bool isSink(alias f)(Map!f map, real point) {
+    return abs(diff(&f, point).result) < 1;
 }
 
-bool isSource(M)(M map, real point)
-    if(isMap!M)
-{
-    real epsilon = 10.0^^(-8);
-    return abs((map(point + epsilon / 2) - map(point - epsilon / 2))
-           / epsilon) > 1;
+bool isSource(alias f)(Map!f map, real point) {
+    return abs(diff(&f, point).result) > 1;
 }
 
 unittest {

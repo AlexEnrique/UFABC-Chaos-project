@@ -3,8 +3,11 @@ import std.traits;
 import std.range.primitives;
 
 enum bool isMap(M) =
-    isInputRange!M
-    && isRandomAccessRange!M
+    isRandomAccessRange!M
     && is(ReturnType!((M m) => m.isAtFixedPoint) == bool)
-    && is(typeof((return ref M m) => m.isAtFixedPoint))
-    && __traits(hasMember, M, "opCall");
+    && __traits(hasMember, M, "isAtFixedPoint")
+    && is(typeof((return ref M m) => m.isAtFixedPoint));
+//
+
+import std.typecons : Tuple;
+alias Coordinates = Tuple!(real, "x", real, "y");

@@ -1,5 +1,6 @@
 module map.logistic;
 import map.map;
+import map.primitives;
 
 /**
     Range template class LogisticMap.
@@ -13,22 +14,46 @@ import map.map;
     Members:
       this(real x) : sets the initial value of the Map!(x => a*x*(1-x))
 */
-class LogisticMap(real a) : Map!(x => a*x*(1-x)) {
+class LogisticMap(real a) : Map!(x => a * x * (1 - x)) {
     this() {}
-        
+
     this(real x) {
         super(x);
     }
 }
 
+/**
+    Dynamic LogisticMap!real class.
+    This is used to avoid the necessity of the compile time nature
+    of the real template value passed to the LogisticMap!real class
+*/
+auto logisticMap(double a, real x = real.init) {
+    class __LogisticMap : Map!(x => a * x * (1 - x)) {
+        this() {}
+
+        this(real x) {
+            super(x);
+        }
+    }
+
+    if (x != real.init) return new __LogisticMap(x);
+    return new __LogisticMap;
+}
+
+import std.range.primitives;
 unittest {
     auto map = new LogisticMap!2(0.01);
+    auto map2 = logisticMap(4, .5);
+
+    // BUG: Fix the implementation of isMap!M
+    /* assert(!is(typeof(cast(Map) map) == void)); */
+    /* assert(isMap!(typeof(map2))); */
 
     import std.range : take;
     import std.math : approxEqual;
-    assert(map.take(12).approxEqual([0.01000, 0.01980, 0.0388159, 0.0746185,
-                                     0.138101, 0.238058, 0.362773, 0.462338,
-                                     0.497163, 0.499984, 0.50000, 0.50000]));
+    assert(map.take(12).approxEqual([0.010000, 0.01980, 0.038816, 0.0746185,
+                                     0.138100, 0.23806, 0.362773, 0.4623380,
+                                     0.497158, 0.49998, 0.500000, 0.5000000]));
     //
     assert(map.isAtFixedPoint);
     assert(map[0].approxEqual(0.01));

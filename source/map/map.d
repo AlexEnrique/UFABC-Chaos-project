@@ -1,5 +1,6 @@
 module map.map;
 import map.primitives;
+import std.array : Appender;
 
 /**
     Range template class Map.
@@ -39,14 +40,14 @@ import map.primitives;
 */
 class Map(alias f) {
     private real _x;
-    private real[] _orbit;
+    private Appender!(real[]) _orbit;
     enum bool empty = false;
 
     this() {}
 
     this(real x) {
         _x = x;
-        _orbit ~= x;
+        _orbit.put(x);
     }
 
     @property real front() const {
@@ -55,7 +56,7 @@ class Map(alias f) {
 
     void popFront() {
         _x = f(_x);
-        _orbit ~= _x;
+        _orbit.put(_x);
     }
 
     @property bool isAtFixedPoint() const {
@@ -63,16 +64,12 @@ class Map(alias f) {
     }
 
     real opIndex(size_t n) {
-        while (_orbit.length <= n) {
-            if (isAtFixedPoint) return _orbit[$ - 1];
+        while (_orbit.data.length <= n) {
+            if (isAtFixedPoint) return _orbit.data[$ - 1];
             popFront();
         }
 
-        return _orbit[n];
-    }
-
-    real opCall(real x) const {
-        return f(x);
+        return _orbit.data[n];
     }
 
     auto save() {
@@ -81,13 +78,16 @@ class Map(alias f) {
 }
 
 unittest {
+    auto map = new Map!(x => 2 * x * (1 - x))(0.01);
+
+    assert(isMap!(typeof(map)));
+
     import std.range : take;
     import std.math : approxEqual;
-    auto map = new Map!(x => 2*x*(1-x))(0.01);
-    assert(isMap!(typeof(map)));
-    assert(map.take(12).approxEqual([0.01000, 0.01980, 0.0388159, 0.0746185,
-                                     0.138101, 0.238058, 0.362773, 0.462338,
-                                     0.497163, 0.499984, 0.50000, 0.50000]));
+
+    assert(map.take(12).approxEqual([0.01000, 0.01980, 0.038816, 0.074618,
+                                     0.13810, 0.23806, 0.362773, 0.462338,
+                                     0.49716, 0.49998, 0.500000, 0.500000]));
     //
     assert(map.isAtFixedPoint);
     assert(map[0].approxEqual(0.01));

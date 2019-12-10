@@ -1,7 +1,7 @@
 module map.standard_map;
 
 import std.typecons : Tuple;
-import std.math : sin;
+import std.math : PI, sin;
 
 import map.map;
 import map.traits;
@@ -10,7 +10,7 @@ private alias ThetaPTuple = Tuple!(real, "theta", real, "p");
 
 auto standardMap(real k) {
     return new Map!( (real theta, real p) =>
-                     ThetaPTuple(theta + p, p + k * sin(theta)) );
+        ThetaPTuple((theta + p) % 2 * PI, p + k * sin(theta + p)) );
 }
 
 unittest {

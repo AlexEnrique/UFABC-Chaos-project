@@ -38,6 +38,8 @@ unittest {
 
 // Convenience
 alias time = times;
+alias points = times;
+alias point = times;
 
 @property T times(T)(T times) if (isIntegral!T) {
     return times;

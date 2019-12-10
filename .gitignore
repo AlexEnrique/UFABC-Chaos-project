@@ -6,3 +6,6 @@ docs.json
 *.lst
 
 bin/
+source/map/temp
+backup-files/
+figures/standard_map.xcf

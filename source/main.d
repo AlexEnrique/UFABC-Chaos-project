@@ -1,70 +1,77 @@
 module main;
 import std.math;
-import std.range;
+import std.range : take, iota;
 import std.algorithm;
 import std.random;
 import std.array;
 import std.stdio;
+import std.format : format;
+import std.typecons;
 
 import plt = matplotlibd.pyplot;
 
 import map.map;
-import map.logistic;
+import map.traits;
 import map.functions;
-import map.primitives;
+import map.logistic_map;
+import map.standard_map;
 
+import ode.runge_kutta;
+alias mapTo = std.algorithm.map;
 
-// alias Coordinates = Tuple!(real, "x", real, "y"); // <-- map.primitives
+import tasks.pendulum_phase_portrait;
+import tasks.standard_map_phase_portrait;
 
-Coordinates randomMap(Coordinates input, real randomNo) {
-    Coordinates coordinates;
-    auto x = input.x, y = input.y;
+string[] tasksOptions;
+void function()[uint] taskList;
 
-    if (randomNo < .01) { // [0, .01]
-        coordinates.x = 0;
-        coordinates.y = 0.16 * y;
+static this() {
+    tasksOptions ~= "1. Plot the phase portrait of the standard map for a " ~
+        "specific value of the parameter k.";
+    //
+    tasksOptions ~= "2. Plot the phase portrait of the standard map varying " ~
+        "the parameter k.";
+    //
+    tasksOptions ~= "3. Plot the phase portrait of the pendulum.";
+
+    ///
+
+    taskList[1] = &tasks.standard_map_phase_portrait.task1;
+    taskList[2] = &tasks.standard_map_phase_portrait.task2;
+    taskList[3] = &tasks.pendulum_phase_portrait.task3;
+}
+
+void writeList(string[] list) {
+    foreach (item; list[0 .. $ - 1]) {
+        writeln(item, '\n');
     }
-    else if (randomNo < .08) { // (.01, .08]
-        coordinates.x = 0.20 * x - 0.26 * y;
-        coordinates.y = 0.23 * x + 0.22 * y + 1.60;
-    }
-    else if (randomNo < .15) { // (.08, .15]
-        coordinates.x = -0.15 * x + 0.28 * y;
-        coordinates.y = 0.26 * x + 0.24 * y + 0.44;
-    }
-    else { // (.15, 1.0]
-        coordinates.x = 0.85 * x + 0.04 * y;
-        coordinates.y = -0.04 * x + 0.85 * y + 1.6;
-    }
-
-    return coordinates;
+    writeln(list[$ - 1]);
 }
 
 
+// main()
 void main() {
-    auto rnd = Mt19937_64(unpredictableSeed!ulong);
+    writeln();
+    writeln("================================================================");
 
-    foreach (a; iota(1, 4, .05))
-        auto map = logisticMap(a, rnd.uniform01);
+    writeln("Which task would you like the program to perform?");
+    tasksOptions.writeList();
 
-    /* real[] x, y;
-    foreach (_; 0 .. 100_000) {
-        auto coord = Coordinates(rnd.uniform01(), rnd.uniform01());
-        foreach (k; 0 .. 100)
-            coord = coord.randomMap(rnd.uniform01);
-        //
-        x ~= coord.x;
-        y ~= coord.y;
+    writeln("================================================================");
+
+    uint option;
+    write("> ");
+    stdin.readf("%d\n", option);
+    writeln();
+
+    if (!taskList.keys.canFind(option)) {
+        writefln("\n\aError: invalid option %d.", option);
+        writeln("\nFinalizando...");
+        return;
     }
 
-    // matplotlib
-    plt.plot(x, y, "g,");
-    plt.title("Barnsley fern");
-    plt.xlim(0, 4);
-    plt.ylim(0, 1);
-    plt.xlabel("parameter $a$");
-    plt.ylabel("orbit");
-    plt.savefig("./figures/barnsley_fern.png");
-    plt.show();
-    plt.clear(); */
+    auto task = taskList[option];
+    task();
+
+    writeln("\nFinalizando...");
 }

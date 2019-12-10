@@ -4,10 +4,15 @@
 	],
 	"copyright": "Copyright © 2019, Alex Enrique Crispim",
 	"dependencies": {
-		"matplotlib-d": "~>0.1.5"
+		"ggplotd": "~>1.2.0",
+		"matplotlib-d": "~>0.1.5",
+		"scid": "~>0.3.0"
 	},
 	"description": "Numeric project for the discipline of \"Nonlinear dynamics and chaos\"",
 	"license": "MIT License",
 	"name": "chaos_project",
+	"subConfigurations": {
+		"ggplotd": "ggplotd-gtk"
+	},
 	"targetPath": "bin"
 }

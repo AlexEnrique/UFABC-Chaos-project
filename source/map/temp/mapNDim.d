@@ -3,22 +3,29 @@ import std.array : Appender;
 import std.traits : isCallable, ReturnType, isImplicitlyConvertible;
 import std.meta : allSatisfy;
 import std.range : drop;
-import std.typecons : Tuple, tuple;
-
+import std.typecons : Tuple, tuple, isTuple;
+import std.range : take;
 
 // Remove latter; it's here to tests
 import std.traits : isNumeric;
+import std.meta : AliasSeq, Alias, aliasSeqOf;
+import std.conv : to;
+import std.stdio;
 //
 
 
 import map.functions;
 
-class Map(alias mapFunc) if (isCallable!mapFunc) {
+
+class Map(alias mapFunc)
+    if (isCallable!mapFunc)
+{
     public alias Type = ReturnType!mapFunc;
 
     private Type _point;
     private Appender!(Type[]) _orbit;
-    public enum bool empty = true; // infinity range
+    enum bool empty = true; // infinity range
+
 
     // Constructors
     this() {
@@ -31,10 +38,12 @@ class Map(alias mapFunc) if (isCallable!mapFunc) {
         _orbit.put(initialPoint);
     }
 
-    this(Args...)(Args initialPoint)
-        if (Args.length == _point.length && allSatisfy!(isNumeric, Args)) // TODO: Change this
+    this(InputType...)(InputType point)
+        if ((!isTuple!Type || InputType.length == _point.length) &&
+            allSatisfy!(isNumeric, InputType) &&
+            isConvertible!(Tuple!InputType, Type))
     {
-        _point = Type(initialPoint);
+        _point = Type(point);
         _orbit.put(_point);
     }
 
@@ -44,7 +53,13 @@ class Map(alias mapFunc) if (isCallable!mapFunc) {
     }
 
     void popFront() {
-        _point = mapFunc(_point[]);
+        static if (isTuple!Type) {
+            _point = mapFunc(_point[]);
+        }
+        else {
+            _point = mapFunc(_point);
+        }
+
         _orbit.put(_point);
     }
 
@@ -63,21 +78,38 @@ class Map(alias mapFunc) if (isCallable!mapFunc) {
     }
 
     @property isAtFixedPoint() const {
-        return _point == mapFunc(_point[]);
+        import std.math : approxEqual;
+        static if (isTuple!Type) {
+            return _point == mapFunc(_point[]);
+        }
+        else {
+            return _point == mapFunc(_point);
+        }
     }
 
-    void resetMap() {
+    void reset() {
         _orbit.clear();
         _point = _point.init;
     }
 
-    void setInitialPoint(Args...)(Args point)
-        if (Args.length == _point.length && allSatisfy!(isNumeric, Args))
+    void setInitialPoint(InputType...)(InputType point)
+        if ((!isTuple!Type || InputType.length == _point.length) &&
+            allSatisfy!(isNumeric, InputType) &&
+            isConvertible!(Tuple!InputType, Type))
     {
         if (this.alreadyInitialized) {
-            string msg =
-                typeof(this).stringof ~ " already initialized to the value " ~
-                this._orbit.data[0].toString();
+            static if (isTuple!Type) {
+                string msg =
+                    typeof(this).stringof ~ " already initialized to the value " ~
+                    this._orbit.data[0].toString() ~ "\nCall the \"reset()\" member" ~
+                    "function to prepare the map for a new initial point";
+            }
+            else {
+                string msg =
+                    typeof(this).stringof ~ " already initialized to the value " ~
+                    this._orbit.data[0].to!string ~ "\nCall the \"reset()\" member" ~
+                    "function to prepare the map for a new initial point";
+            }
             //
             throw new MapInitializationException(msg);
         }
@@ -88,9 +120,16 @@ class Map(alias mapFunc) if (isCallable!mapFunc) {
 
     void setInitialPoint(Type point) {
         if (this.alreadyInitialized) {
-            string msg =
-                typeof(this).stringof ~ " already initialized to the value " ~
-                this._orbit.data[0].toString();
+            static if (isTuple!Type) {
+                string msg =
+                    typeof(this).stringof ~ " already initialized to the value " ~
+                    this._orbit.data[0].toString();
+            }
+            else {
+                string msg =
+                    typeof(this).stringof ~ " already initialized to the value " ~
+                    this._orbit.data[0].to!string;
+            }
             //
             throw new MapInitializationException(msg);
         }
@@ -121,6 +160,34 @@ class MapInitializationException : Exception {
     }
 }
 
+
+enum bool isConvertible(From, To) =
+{
+    static if (isTuple!To) {
+        if (From.length != To.length) return false;
+
+        foreach(n; 0 .. From.length)
+        {
+            if ( !is(typeof(From[n]) : typeof(To[n])) )
+                return true;
+        }
+        return true;
+    }
+    else {
+        return is(typeof(From[0]) : To);
+    }
+}();
+
+unittest {
+    assert(isConvertible!( Tuple!(real, float, long),
+                           Tuple!(real, real, real) ));
+    //
+    assert(isConvertible!( Tuple!(uint, long, byte),
+                           Tuple!(long, ulong, int) ));
+    //
+    assert(isConvertible!( Tuple!(string, char, char[]),
+                           Tuple!(string, string, string) ));
+}
 
 unittest {
     alias f = (real x, real y) => tuple!(real, "x", real, "y")(y, - x);
@@ -153,4 +220,26 @@ unittest {
     auto standardMap = new Map!stdMapExpression;
 
     standardMap.setInitialPoint(1.0, 0.5);
+}
+
+unittest {
+    auto map = new Map!((real x) => 2 * x * (1 - x));
+    map.setInitialPoint(0.6);
+    map.reset();
+    map.setInitialPoint(.01);
+
+    import std.math : approxEqual;
+
+    // BUG:
+    writeln("BUG: map.take(12) == ", map.take(12));
+    // BUG: assert(map.isAtFixedPoint);
+
+    //
+    /* assert(map.take(12).approxEqual([0.01000, 0.01980, 0.0388158, 0.074618,
+                                     0.13810, 0.23806, 0.362773, 0.462338,
+                                     0.497158, 0.49998, 0.500000, 0.500000])); */
+    //
+    assert(map[0].approxEqual(0.01));
+    assert(map[11].approxEqual(0.5));
+    assert(map[15464].approxEqual(0.5));
 }

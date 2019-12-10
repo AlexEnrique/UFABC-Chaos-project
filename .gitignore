@@ -6,3 +6,5 @@ docs.json
 *.lst
 
 bin/
+source/map/temp
+backup-files/

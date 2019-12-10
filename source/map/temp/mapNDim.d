@@ -1,16 +1,13 @@
 module map.temp.mapNDim;
 import std.array : Appender;
-import std.traits : isCallable, ReturnType, isImplicitlyConvertible;
+import std.traits : isCallable, isNumeric, ReturnType;
 import std.meta : allSatisfy;
-import std.range : drop;
 import std.typecons : Tuple, tuple, isTuple;
 import std.range : take;
 
 // Remove latter; it's here to tests
-import std.traits : isNumeric;
-import std.meta : AliasSeq, Alias, aliasSeqOf;
 import std.conv : to;
-import std.stdio;
+/* import std.stdio; */
 //
 
 
@@ -24,7 +21,7 @@ class Map(alias mapFunc)
 
     private Type _point;
     private Appender!(Type[]) _orbit;
-    enum bool empty = true; // infinity range
+    enum bool empty = false; // infinity range
 
 
     // Constructors
@@ -39,7 +36,8 @@ class Map(alias mapFunc)
     }
 
     this(InputType...)(InputType point)
-        if ((!isTuple!Type || InputType.length == _point.length) &&
+        if (isTuple!Type &&
+            InputType.length == _point.length &&
             allSatisfy!(isNumeric, InputType) &&
             isConvertible!(Tuple!InputType, Type))
     {
@@ -93,7 +91,8 @@ class Map(alias mapFunc)
     }
 
     void setInitialPoint(InputType...)(InputType point)
-        if ((!isTuple!Type || InputType.length == _point.length) &&
+        if (isTuple!Type &&
+            InputType.length == _point.length &&
             allSatisfy!(isNumeric, InputType) &&
             isConvertible!(Tuple!InputType, Type))
     {
@@ -123,12 +122,14 @@ class Map(alias mapFunc)
             static if (isTuple!Type) {
                 string msg =
                     typeof(this).stringof ~ " already initialized to the value " ~
-                    this._orbit.data[0].toString();
+                    this._orbit.data[0].toString() ~ "\nCall the \"reset()\" member" ~
+                    "function to prepare the map for a new initial point";
             }
             else {
                 string msg =
                     typeof(this).stringof ~ " already initialized to the value " ~
-                    this._orbit.data[0].to!string;
+                    this._orbit.data[0].to!string ~ "\nCall the \"reset()\" member" ~
+                    "function to prepare the map for a new initial point";
             }
             //
             throw new MapInitializationException(msg);
@@ -194,10 +195,11 @@ unittest {
     auto map = new Map!f(1, 0.5);
     map.iterate(7.times);
 
-    assert(map[0] == Tuple!(real, "x", real, "y")(1, 0.5));
-    assert(map[1] == Tuple!(real, "x", real, "y")(0.5, - 1));
-    assert(map[2] == Tuple!(real, "x", real, "y")(- 1, - 0.5));
-    assert(map[3] == Tuple!(real, "x", real, "y")(- 0.5, 1));
+    alias XYCoordinates = Tuple!(real, "x", real, "y");
+    assert(map[0] == XYCoordinates(1, 0.5));
+    assert(map[1] == XYCoordinates(0.5, - 1));
+    assert(map[2] == XYCoordinates(- 1, - 0.5));
+    assert(map[3] == XYCoordinates(- 0.5, 1));
     assert(map[4] == map[0]);
 
     try {
@@ -229,17 +231,13 @@ unittest {
     map.setInitialPoint(.01);
 
     import std.math : approxEqual;
-
-    // BUG:
-    writeln("BUG: map.take(12) == ", map.take(12));
-    // BUG: assert(map.isAtFixedPoint);
-
-    //
-    /* assert(map.take(12).approxEqual([0.01000, 0.01980, 0.0388158, 0.074618,
+    assert(map.take(12).approxEqual([0.01000, 0.01980, 0.0388158, 0.074618,
                                      0.13810, 0.23806, 0.362773, 0.462338,
-                                     0.497158, 0.49998, 0.500000, 0.500000])); */
+                                     0.497158, 0.49998, 0.500000, 0.500000]));
     //
+
+    assert(map.isAtFixedPoint);
     assert(map[0].approxEqual(0.01));
     assert(map[11].approxEqual(0.5));
-    assert(map[15464].approxEqual(0.5));
+    assert(map[99915546555464].approxEqual(0.5));
 }

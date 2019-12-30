@@ -7,6 +7,8 @@ import std.random;
 import std.array;
 import std.stdio;
 import std.format : format;
+import std.typecons;
+import std.conv : to;
 
 import plt = matplotlibd.pyplot;
 
@@ -16,7 +18,16 @@ import map.functions;
 import map.logistic_map;
 import map.standard_map;
 
-alias mapTo = std.algorithm.map;
+import std.range : isInputRange;
+import std.traits : Unqual;
+template mapTo(fun...) if (fun.length >= 1)
+{
+    auto mapTo(Range)(Range r)
+        if (isInputRange!(Unqual!Range))
+    {
+        return std.algorithm.map!(fun)(r);
+    }
+}
 
 
 void task1() {
@@ -26,16 +37,21 @@ void task1() {
     writeln("Running...");
 
     auto map = standardMap(k);
-    foreach (_; 0 .. 100) {
-        auto rnd = Random(unpredictableSeed);
+
+    auto domain = iota(0, 2 * PI + 2 * PI / 10, 2 * PI / 10);
+    auto initialConditions = cartesianProduct(domain, domain)
+                                .array()
+                                .to!(Tuple!(real, "theta", real, "p")[]);
+    //
+    foreach (n; 0 .. initialConditions.length) {
         map.reset();
-        map.setInitialPoint(uniform(0, 2* PI, rnd), uniform(- 2 * PI, 2 * PI, rnd));
+        map.setInitialPoint(initialConditions[n]);
 
         auto orbit = map.take(300.points);
-        auto theta = mapTo!(tup => tup.theta)(orbit).array;
-        auto p = mapTo!(tup => tup.p)(orbit).array;
+        auto theta = orbit.mapTo!(tup => tup.theta).array;
+        auto p = orbit.mapTo!(tup => tup.p).array;
 
-        plt.plot(theta, p, ",");
+        plt.plot(p, theta, ",");
     }
 
     writeln("\nPlotting...");
@@ -44,15 +60,15 @@ void task1() {
     plt.title(format("Standard Map evolution for k = %.2f", k));
     plt.xlim(0, 2 * PI);
     plt.ylim(0, 2 * PI);
-    plt.xlabel("angle $theta$");
-    plt.ylabel("momentum $p$");
+    plt.xlabel("momentum $p$");
+    plt.ylabel("angle $theta$");
 
     string figurePath = format("./figures/standard_map_(k=%.2f).png", k);
     plt.savefig(figurePath);
     writefln("Figure generated for k = %.2f at %s", k, figurePath);
 
     write("\n\aShow figure? [s/n]", '\n', "> ");
-    char show;
+    char show = 's';
     readf("%s\n", show);
 
     if (show == 's')
@@ -67,27 +83,31 @@ void task2() {
     alias mapTo = std.algorithm.map;
 
     writeln("Running...");
-    foreach (real k; iota(0.0, .5, 0.01)) {
+    foreach (real k; iota(0.0, 2.00 + 0.01, 0.01)) {
         auto map = standardMap(k);
 
-        foreach (_; 0 .. 100) {
-            auto rnd = Random(unpredictableSeed);
+        auto domain = iota(0, 2 * PI + 2 * PI / 10, 2 * PI / 10);
+        auto initialConditions = cartesianProduct(domain, domain)
+                                    .array()
+                                    .to!(Tuple!(real, "theta", real, "p")[]);
+        //
+        foreach (n; 0 .. initialConditions.length) {
             map.reset();
-            map.setInitialPoint(uniform(0, 2* PI, rnd), uniform(- 2 * PI, 2 * PI, rnd));
+            map.setInitialPoint(initialConditions[n]);
 
-            auto orbit = map.take(300.points);
+            auto orbit = map.take(400.points);
             auto theta = mapTo!(tup => tup.theta)(orbit).array;
-            auto pMomentum = mapTo!(tup => tup.p)(orbit).array;
+            auto p = mapTo!(tup => tup.p)(orbit).array;
 
-            plt.plot(theta, pMomentum, ",", ["linewidth":0.1]);
+            plt.plot(p, theta, ",");
         }
 
         // matplotlib-d
         plt.title(format("Standard Map evolution for k = %.2f", k));
         plt.xlim(0, 2 * PI);
         plt.ylim(0, 2 * PI);
-        plt.xlabel("angle $theta$");
-        plt.ylabel("momentum $p$");
+        plt.xlabel("momentum $p$");
+        plt.ylabel("angle $theta$");
 
         string figurePath = format("./figures/standard_map/(k=%.2f).png", k);
         plt.savefig(figurePath);
@@ -96,5 +116,5 @@ void task2() {
         plt.clear();
     }
 
-    writefln("\n\aFigures generated at ", "./figures/standard_map/");
+    writefln("\n\aFigures generated at %s", `./figures/standard_map/`);
 }

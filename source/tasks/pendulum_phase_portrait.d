@@ -18,7 +18,17 @@ import map.logistic_map;
 import map.standard_map;
 
 import ode.runge_kutta;
-alias mapTo = std.algorithm.map;
+
+import std.range : isInputRange;
+import std.traits : Unqual;
+template mapTo(fun...) if (fun.length >= 1)
+{
+    auto mapTo(Range)(Range r)
+        if (isInputRange!(Unqual!Range))
+    {
+        return std.algorithm.map!(fun)(r);
+    }
+}
 
 
 // generating points
@@ -62,8 +72,8 @@ void task3() {
     {
         auto orbit = rungeKutta!(vectorField)(Vector2R(point.theta, point.p), time);
 
-        auto theta = mapTo!(vec => vec[0])(orbit).array;
-        auto p = mapTo!(vec => vec[1])(orbit).array;
+        auto theta = orbit.mapTo!(vec => vec[0]).array;
+        auto p = orbit.mapTo!(vec => vec[1]).array;
 
         plt.plot(theta, p, "-", ["linewidth":0.5]);
 

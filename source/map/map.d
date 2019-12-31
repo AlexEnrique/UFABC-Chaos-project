@@ -111,7 +111,7 @@ class Map(alias mapFunc)
         return _orbit.data[n];
     }
 
-    @property isAtFixedPoint() const {
+    @property bool isAtFixedPoint() const {
         import std.math : approxEqual;
         static if (isTuple!Type) {
             return _point == mapFunc(_point[]);
@@ -136,13 +136,13 @@ class Map(alias mapFunc)
             static if (isTuple!Type) {
                 string msg =
                     typeof(this).stringof ~ " already initialized to the value " ~
-                    this._orbit.data[0].toString() ~ "\nCall the \"reset()\" member" ~
+                    this._orbit.data[0].toString() ~ "\nCall the \"reset()\" member " ~
                     "function to prepare the map for a new initial point";
             }
             else {
                 string msg =
                     typeof(this).stringof ~ " already initialized to the value " ~
-                    this._orbit.data[0].to!string ~ "\nCall the \"reset()\" member" ~
+                    this._orbit.data[0].to!string ~ "\nCall the \"reset()\" member " ~
                     "function to prepare the map for a new initial point";
             }
             //
@@ -158,13 +158,13 @@ class Map(alias mapFunc)
             static if (isTuple!Type) {
                 string msg =
                     typeof(this).stringof ~ " already initialized to the value " ~
-                    this._orbit.data[0].toString() ~ "\nCall the \"reset()\" member" ~
+                    this._orbit.data[0].toString() ~ "\nCall the \"reset()\" member " ~
                     "function to prepare the map for a new initial point";
             }
             else {
                 string msg =
                     typeof(this).stringof ~ " already initialized to the value " ~
-                    this._orbit.data[0].to!string ~ "\nCall the \"reset()\" member" ~
+                    this._orbit.data[0].to!string ~ "\nCall the \"reset()\" member " ~
                     "function to prepare the map for a new initial point";
             }
             //

@@ -21,24 +21,31 @@ alias mapTo = std.algorithm.map;
 
 import tasks.pendulum_phase_portrait;
 import tasks.standard_map_phase_portrait;
+import tasks.sensitive_dependence;
 
-string[] tasksOptions;
+string[] taskOptions;
 void function()[uint] taskList;
 
 static this() {
-    tasksOptions ~= "1. Plot the phase portrait of the standard map for a " ~
+    taskOptions ~= "1. Plot the phase portrait of the standard map for a " ~
         "specific value of the parameter k.";
     //
-    tasksOptions ~= "2. Plot the phase portrait of the standard map varying " ~
+    taskOptions ~= "2. Plot the phase portrait of the standard map varying " ~
         "the parameter k.";
     //
-    tasksOptions ~= "3. Plot the phase portrait of the pendulum.";
+    taskOptions ~= "3. Plot the phase portrait of the pendulum.";
+    //
+    taskOptions ~= "4. List 1 - problem 10";
+    //
+    taskOptions ~= "5. Sensitive dependence of the logistic map f_4";
 
     ///
 
     taskList[1] = &tasks.standard_map_phase_portrait.task1;
     taskList[2] = &tasks.standard_map_phase_portrait.task2;
     taskList[3] = &tasks.pendulum_phase_portrait.task3;
+    taskList[4] = &tasks.sensitive_dependence.task4;
+    taskList[5] = &tasks.sensitive_dependence.task5;
 }
 
 void writeList(string[] list) {
@@ -55,7 +62,7 @@ void main() {
     writeln("================================================================");
 
     writeln("Which task would you like the program to perform?");
-    tasksOptions.writeList();
+    taskOptions.writeList();
 
     writeln("================================================================");
 
@@ -66,12 +73,12 @@ void main() {
 
     if (!taskList.keys.canFind(option)) {
         writefln("\n\aError: invalid option %d.", option);
-        writeln("\nFinalizando...");
+        writeln("\nExiting...");
         return;
     }
 
     auto task = taskList[option];
     task();
 
-    writeln("\nFinalizando...");
+    writeln("\nExiting...");
 }

@@ -22,6 +22,7 @@ alias mapTo = std.algorithm.map;
 import tasks.pendulum_phase_portrait;
 import tasks.standard_map_phase_portrait;
 import tasks.sensitive_dependence;
+import tasks.stable_and_unstable_manifolds;
 
 string[] taskOptions;
 void function()[uint] taskList;
@@ -38,6 +39,10 @@ static this() {
     taskOptions ~= "4. List 1 - problem 10";
     //
     taskOptions ~= "5. Sensitive dependence of the logistic map f_4";
+    //
+    taskOptions ~= "6. Stable and unstable manifolds of the standard map " ~
+                    "at the origin";
+    //
 
     ///
 
@@ -46,6 +51,7 @@ static this() {
     taskList[3] = &tasks.pendulum_phase_portrait.task3;
     taskList[4] = &tasks.sensitive_dependence.task4;
     taskList[5] = &tasks.sensitive_dependence.task5;
+    taskList[6] = &tasks.stable_and_unstable_manifolds.task6;
 }
 
 void writeList(string[] list) {
@@ -61,7 +67,7 @@ void main() {
     writeln();
     writeln("================================================================");
 
-    writeln("Which task would you like the program to perform?");
+    writeln(" ** Which task would you like the program to perform? **\n");
     taskOptions.writeList();
 
     writeln("================================================================");

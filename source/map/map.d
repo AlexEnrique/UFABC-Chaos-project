@@ -97,6 +97,10 @@ class Map(alias mapFunc)
         _orbit.put(_point);
     }
 
+    typeof(this) save() {
+        return this;
+    }
+
     // for convenience to avoid using std.range.drop(R)(R, int)
     void iterate(int numTimes = 1) {
         foreach (_; 0 .. numTimes) popFront();
@@ -121,6 +125,7 @@ class Map(alias mapFunc)
         }
     }
 
+    // functions to change initial point
     void reset() {
         _orbit.clear();
         _point = _point.init;
@@ -179,8 +184,14 @@ class Map(alias mapFunc)
         return _orbit.data.length != 0;
     }
 
-    typeof(this) save() {
-        return this;
+    public Array apply(Array)(Array array) // Add constaits latter
+    {
+        Array result;
+        foreach (element; array) {
+            result ~= mapFunc(element.theta, element.p);
+        }
+
+        return result;
     }
 }
 

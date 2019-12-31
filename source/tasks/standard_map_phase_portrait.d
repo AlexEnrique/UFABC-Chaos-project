@@ -96,8 +96,8 @@ void task2() {
             map.setInitialPoint(initialConditions[n]);
 
             auto orbit = map.take(400.points);
-            auto theta = mapTo!(tup => tup.theta)(orbit).array;
-            auto p = mapTo!(tup => tup.p)(orbit).array;
+            auto theta = orbit.mapTo!(tup => tup.theta).array;
+            auto p = orbit.mapTo!(tup => tup.p).array;
 
             plt.plot(p, theta, ",");
         }

@@ -9,6 +9,7 @@ bin/
 source/map/temp
 backup-files/
 figures/standard_map.xcf
+*.xcf
 figures/standard_map/
 
 source/python-test/
